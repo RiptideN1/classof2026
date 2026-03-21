@@ -29,6 +29,13 @@ async function buildAll() {
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)
     external: [
       "*.node",
+      "@mercuryworkshop/scramjet",
+      "@mercuryworkshop/scramjet/path",
+      "@mercuryworkshop/bare-mux",
+      "@mercuryworkshop/bare-mux/node",
+      "@mercuryworkshop/libcurl-transport",
+      "@mercuryworkshop/wisp-js",
+      "@mercuryworkshop/wisp-js/server",
       "sharp",
       "better-sqlite3",
       "sqlite3",
