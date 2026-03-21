@@ -110,7 +110,7 @@ export default function App() {
       return;
     }
 
-    const resolved = searchToUrl(targetUrl, "https://www.google.com/search?q=%s");
+    const resolved = searchToUrl(targetUrl, "https://duckduckgo.com/?q=%s");
 
     const wispUrl =
       (location.protocol === "https:" ? "wss" : "ws") +
@@ -167,7 +167,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
       {/* Browser toolbar — only shown when browsing */}
       {browsing && (
         <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
@@ -268,7 +268,7 @@ export default function App() {
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { label: "Google", url: "https://google.com", icon: "🔍" },
+                { label: "DuckDuckGo", url: "https://duckduckgo.com", icon: "🦆" },
                 { label: "YouTube", url: "https://youtube.com", icon: "▶️" },
                 { label: "Reddit", url: "https://reddit.com", icon: "🔴" },
                 { label: "Twitter", url: "https://twitter.com", icon: "🐦" },
