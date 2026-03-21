@@ -18,17 +18,33 @@ if (Number.isNaN(port) || port <= 0) {
 
 const server = createServer(app);
 
-server.on("upgrade", async (req, socket, head) => {
-  try {
-    if (req.url && req.url.endsWith("/wisp/")) {
-      const { server: wisp, logging } = await import("@mercuryworkshop/wisp-js/server");
-      logging.set_level(logging.NONE);
-      wisp.routeRequest(req, socket, head);
+let wispRouteRequest: ((req: unknown, socket: unknown, head: unknown) => void) | null = null;
+
+import("@mercuryworkshop/wisp-js/server").then((mod) => {
+  const { server: wisp, logging } = mod as {
+    server: { routeRequest: (req: unknown, socket: unknown, head: unknown) => void; options: Record<string, unknown> };
+    logging: { set_level: (level: unknown) => void; NONE: unknown };
+  };
+  logging.set_level(logging.NONE);
+  Object.assign(wisp.options, {
+    allow_udp_streams: false,
+    dns_servers: ["1.1.1.3", "1.0.0.3"],
+  });
+  wispRouteRequest = wisp.routeRequest.bind(wisp);
+  logger.info("Wisp server ready for WebSocket connections at /wisp/");
+}).catch((err: unknown) => {
+  logger.error({ err }, "Failed to load wisp-js server");
+});
+
+server.on("upgrade", (req, socket, head) => {
+  if (req.url && req.url.endsWith("/wisp/")) {
+    if (wispRouteRequest) {
+      wispRouteRequest(req, socket, head);
     } else {
+      logger.warn("Wisp not ready yet, closing socket");
       socket.end();
     }
-  } catch (err) {
-    logger.error({ err }, "Error handling WebSocket upgrade");
+  } else {
     socket.end();
   }
 });
