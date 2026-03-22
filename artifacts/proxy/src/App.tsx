@@ -275,30 +275,17 @@ export default function App() {
             )}
 
             <form onSubmit={handleSubmit} className="w-full">
-              <form onSubmit={handleSubmit} className="w-full">
-  <div className="flex items-center bg-gray-800 rounded-xl border border-gray-700 px-3">
-    <input
-      type="text"
-      value={urlInput}
-      onChange={(e) => setUrlInput(e.target.value)}
-      placeholder="Search the web or enter a URL..."
-      className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-base px-2 py-2"
-      autoFocus
-      disabled={!engineReady}
-    />
-    <button
-      type="submit"
-      disabled={!engineReady || loading}
-      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-semibold transition-colors"
-    >
-      {loading ? (
-        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      ) : (
-        "Go"
-      )}
-    </button>
-  </div>
-</form>
+              <div className="flex items-center gap-2 bg-gray-900 rounded-2xl p-2 border border-gray-800 focus-within:border-blue-500 transition-colors shadow-xl">
+                <svg
+                  className="w-5 h-5 text-gray-500 ml-2 flex-shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
                 <input
                   type="text"
                   value={urlInput}
@@ -330,10 +317,12 @@ export default function App() {
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { label: "DuckDuckGo", url: "https://duckduckgo.com"},
-                { label: "YouTube", url: "https://youtube.com"},
-          { label: "ESPN", url: "https://espn.com"}
-
+                { label: "DuckDuckGo", url: "https://duckduckgo.com", tag: "search" },
+                { label: "YouTube", url: "https://youtube.com", tag: "video" },
+                { label: "Wikipedia", url: "https://wikipedia.org", tag: "wiki" },
+                { label: "GitHub", url: "https://github.com", tag: "code" },
+                { label: "Reddit", url: "https://reddit.com", tag: "forum" },
+                { label: "Archive", url: "https://archive.org", tag: "media" },
               ].map(({ label, url, tag }) => (
                 <button
                   key={label}
