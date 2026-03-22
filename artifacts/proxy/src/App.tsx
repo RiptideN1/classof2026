@@ -275,12 +275,7 @@ export default function App() {
             )}
 
             <form onSubmit={handleSubmit} className="w-full">
-              <div className="flex items-center gap-2 bg-gray-900 rounded-2xl p-2 border border-gray-800 focus-within:border-blue-500 transition-colors shadow-xl">
-               <img
-    src="https://resources.finalsite.net/images/f_auto,q_auto/v1721830591/svmsnjorg/dtztvr3afejs1utlarve/svmsfinallogo.png"
-    alt="SVMS Logo"
-    className="w-8 h-8 object-contain"
-  />
+              
                 <input
                   type="text"
                   value={urlInput}
@@ -312,12 +307,10 @@ export default function App() {
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { label: "DuckDuckGo", url: "https://duckduckgo.com", tag: "search" },
-                { label: "YouTube", url: "https://youtube.com", tag: "video" },
-                { label: "Wikipedia", url: "https://wikipedia.org", tag: "wiki" },
-                { label: "GitHub", url: "https://github.com", tag: "code" },
-                { label: "Reddit", url: "https://reddit.com", tag: "forum" },
-                { label: "Archive", url: "https://archive.org", tag: "media" },
+                { label: "DuckDuckGo", url: "https://duckduckgo.com"},
+                { label: "YouTube", url: "https://youtube.com"},
+          { label: "ESPN", url: "https://espn.com"}
+
               ].map(({ label, url, tag }) => (
                 <button
                   key={label}
