@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: willdagoat-scramjet
+    runtime: node
+    plan: starter
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run build:scramjet
+    startCommand: pnpm run start:scramjet
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production

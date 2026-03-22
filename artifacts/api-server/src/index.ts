@@ -1,14 +1,10 @@
 import { createServer } from "node:http";
+import { createRequire } from "node:module";
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+const require = createRequire(import.meta.url);
+const rawPort = process.env["PORT"] ?? "3000";
 
 const port = Number(rawPort);
 
@@ -20,11 +16,15 @@ const server = createServer(app);
 
 let wispRouteRequest: ((req: unknown, socket: unknown, head: unknown) => void) | null = null;
 
-import("@mercuryworkshop/wisp-js/server").then((mod) => {
-  const { server: wisp, logging } = mod as {
-    server: { routeRequest: (req: unknown, socket: unknown, head: unknown) => void; options: Record<string, unknown> };
+try {
+  const { server: wisp, logging } = require("@mercuryworkshop/wisp-js/server") as {
+    server: {
+      routeRequest: (req: unknown, socket: unknown, head: unknown) => void;
+      options: Record<string, unknown>;
+    };
     logging: { set_level: (level: unknown) => void; NONE: unknown };
   };
+
   logging.set_level(logging.NONE);
   Object.assign(wisp.options, {
     allow_udp_streams: false,
@@ -32,9 +32,9 @@ import("@mercuryworkshop/wisp-js/server").then((mod) => {
   });
   wispRouteRequest = wisp.routeRequest.bind(wisp);
   logger.info("Wisp server ready for WebSocket connections at /wisp/");
-}).catch((err: unknown) => {
+} catch (err: unknown) {
   logger.error({ err }, "Failed to load wisp-js server");
-});
+}
 
 server.on("upgrade", (req, socket, head) => {
   if (req.url && req.url.endsWith("/wisp/")) {

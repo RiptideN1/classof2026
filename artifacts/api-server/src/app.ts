@@ -1,8 +1,29 @@
+import { createRequire } from "node:module";
+import path from "node:path";
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+const require = createRequire(import.meta.url);
+const { scramjetPath } = require("@mercuryworkshop/scramjet/path") as {
+  scramjetPath: string;
+};
+const { baremuxPath } = require("@mercuryworkshop/bare-mux/node") as {
+  baremuxPath: string;
+};
+const { libcurlPath } = require("@mercuryworkshop/libcurl-transport") as {
+  libcurlPath: string;
+};
+const proxyClientPath = path.resolve(
+  import.meta.dirname,
+  "..",
+  "..",
+  "proxy",
+  "dist",
+  "public",
+);
 
 const app: Express = express();
 
@@ -36,33 +57,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use((_req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
   next();
 });
 
-import("@mercuryworkshop/scramjet/path").then((mod) => {
-  const scramjetPath: string = (mod as Record<string, string>).scramjetPath;
-  logger.info({ scramjetPath }, "Serving Scramjet static files at /scram");
-  app.use("/scram", express.static(scramjetPath));
-}).catch((err: unknown) => {
-  logger.error({ err }, "Failed to load scramjet path");
-});
+logger.info({ scramjetPath }, "Serving Scramjet static files at /scram");
+app.use("/scram", express.static(scramjetPath));
 
-import("@mercuryworkshop/bare-mux/node").then((mod) => {
-  const baremuxPath: string = (mod as Record<string, string>).baremuxPath;
-  logger.info({ baremuxPath }, "Serving BareMux static files at /baremux");
-  app.use("/baremux", express.static(baremuxPath));
-}).catch((err: unknown) => {
-  logger.error({ err }, "Failed to load baremux path");
-});
+logger.info({ baremuxPath }, "Serving BareMux static files at /baremux");
+app.use("/baremux", express.static(baremuxPath));
 
-import("@mercuryworkshop/libcurl-transport").then((mod) => {
-  const libcurlPath: string = (mod as Record<string, string>).libcurlPath;
-  logger.info({ libcurlPath }, "Serving libcurl static files at /libcurl");
-  app.use("/libcurl", express.static(libcurlPath));
-}).catch((err: unknown) => {
-  logger.error({ err }, "Failed to load libcurl path");
-});
+logger.info({ libcurlPath }, "Serving libcurl static files at /libcurl");
+app.use("/libcurl", express.static(libcurlPath));
 
 app.use("/api", router);
+app.use(express.static(proxyClientPath));
+app.get("/{*path}", (_req, res) => {
+  res.sendFile(path.join(proxyClientPath, "index.html"));
+});
 
 export default app;
