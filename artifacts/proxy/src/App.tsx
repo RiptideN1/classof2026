@@ -276,16 +276,11 @@ export default function App() {
 
             <form onSubmit={handleSubmit} className="w-full">
               <div className="flex items-center gap-2 bg-gray-900 rounded-2xl p-2 border border-gray-800 focus-within:border-blue-500 transition-colors shadow-xl">
-                <svg
-                  className="w-5 h-5 text-gray-500 ml-2 flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
+               <img
+    src="https://resources.finalsite.net/images/f_auto,q_auto/v1721830591/svmsnjorg/dtztvr3afejs1utlarve/svmsfinallogo.png"
+    alt="SVMS Logo"
+    className="w-8 h-8 object-contain"
+  />
                 <input
                   type="text"
                   value={urlInput}
