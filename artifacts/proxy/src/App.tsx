@@ -92,7 +92,7 @@ export default function App() {
         setEngineReady(true);
       } catch (cause) {
         console.error("Failed to initialize Scramjet", cause);
-        setError("Failed to initialize the proxy engine.");
+        setError("Failed to initialize the engine.");
       }
     };
 
@@ -106,7 +106,7 @@ export default function App() {
         }
       };
       script.onerror = () => {
-        setError(`Failed to load proxy script: ${src}`);
+        setError(`Failed to load script: ${src}`);
       };
       document.head.appendChild(script);
     }
@@ -133,7 +133,7 @@ export default function App() {
     }
 
     if (!controllerRef.current || !connectionRef.current) {
-      setError("Proxy engine not ready. Refresh the page and try again.");
+      setError("Engine not ready. Refresh the page and try again.");
       setLoading(false);
       return;
     }
@@ -260,7 +260,7 @@ export default function App() {
                 </svg>
               </div>
               <h1 className="text-3xl font-bold text-white mb-1">
-                Scramjet Proxy
+                SVMS Math Help
               </h1>
               <p className="text-gray-400 text-sm">
                 Best compatibility path for heavier sites
@@ -270,7 +270,7 @@ export default function App() {
             {!engineReady && (
               <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-6">
                 <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <span>Loading proxy engine...</span>
+                <span>Loading engine...</span>
               </div>
             )}
 
