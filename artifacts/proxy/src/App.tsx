@@ -275,7 +275,30 @@ export default function App() {
             )}
 
             <form onSubmit={handleSubmit} className="w-full">
-              
+              <form onSubmit={handleSubmit} className="w-full">
+  <div className="flex items-center bg-gray-800 rounded-xl border border-gray-700 px-3">
+    <input
+      type="text"
+      value={urlInput}
+      onChange={(e) => setUrlInput(e.target.value)}
+      placeholder="Search the web or enter a URL..."
+      className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-base px-2 py-2"
+      autoFocus
+      disabled={!engineReady}
+    />
+    <button
+      type="submit"
+      disabled={!engineReady || loading}
+      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-semibold transition-colors"
+    >
+      {loading ? (
+        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      ) : (
+        "Go"
+      )}
+    </button>
+  </div>
+</form>
                 <input
                   type="text"
                   value={urlInput}
