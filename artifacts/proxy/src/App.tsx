@@ -247,23 +247,12 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center px-4">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 mb-4 shadow-lg shadow-blue-500/20">
-                <svg
-                  className="w-8 h-8 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-              </div>
+            
               <h1 className="text-3xl font-bold text-white mb-1">
                 SVMS Math Help
               </h1>
               <p className="text-gray-400 text-sm">
-                Best compatibility path for heavier sites
+                We all know who made it
               </p>
             </div>
 
@@ -317,12 +306,9 @@ export default function App() {
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { label: "DuckDuckGo", url: "https://duckduckgo.com", tag: "search" },
-                { label: "YouTube", url: "https://youtube.com", tag: "video" },
-                { label: "Wikipedia", url: "https://wikipedia.org", tag: "wiki" },
-                { label: "GitHub", url: "https://github.com", tag: "code" },
-                { label: "Reddit", url: "https://reddit.com", tag: "forum" },
-                { label: "Archive", url: "https://archive.org", tag: "media" },
+                { label: "DuckDuckGo", url: "https://duckduckgo.com"},
+                { label: "ESPN", url: "https://espn.com"},
+                { label: "YouTube", url: "https://youtube.com"},
               ].map(({ label, url, tag }) => (
                 <button
                   key={label}
