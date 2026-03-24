@@ -1,5 +1,6 @@
 import { createRequire } from "node:module";
 import path from "node:path";
+import cookieParser from "cookie-parser";
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
@@ -52,6 +53,7 @@ app.use(cors({
   origin: true,
   credentials: true,
 }));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

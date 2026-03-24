@@ -20,6 +20,7 @@
     "cors": "^2",
     "drizzle-orm": "catalog:",
     "express": "^5",
+    "google-auth-library": "^9.15.1",
     "pino": "^9",
     "pino-http": "^10",
     "ws": "^8.19.0"
