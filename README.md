@@ -77,24 +77,3 @@ Start Command: pnpm run start:scramjet
 ```
 
 The service listens on Render's `PORT` automatically through the Node server.
-
-### Google Sign-In Setup
-
-This app can now use official Google sign-in on the homepage without sending the login flow through the proxy.
-
-Set these Render environment variables:
-
-```text
-GOOGLE_CLIENT_ID=your_google_web_client_id
-SESSION_SECRET=a_long_random_secret_string
-```
-
-In Google Cloud Console, create a Web OAuth client and add your deployed site origin, for example:
-
-```text
-https://your-render-domain.onrender.com
-```
-
-If you later attach a custom domain, add that origin too.
-
-The homepage will show a Google sign-in button when `GOOGLE_CLIENT_ID` is configured. The backend verifies the Google ID token and creates its own signed session cookie for the site.

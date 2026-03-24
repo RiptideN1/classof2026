@@ -9,7 +9,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: SESSION_SECRET
-        sync: false
