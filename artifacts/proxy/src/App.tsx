@@ -19,6 +19,60 @@ declare global {
   }
 }
 
+const PROXY_SCRIPT_URLS = ["/scram/scramjet.all.js", "/baremux/index.js"];
+
+let proxyScriptsReadyPromise: Promise<void> | null = null;
+let serviceWorkerReadyPromise: Promise<ServiceWorkerRegistration> | null = null;
+
+function ensureProxyScript(src: string): Promise<void> {
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[data-proxy-src="${src}"]`,
+  );
+
+  if (existing?.dataset.loaded === "true") {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const script =
+      existing ??
+      Object.assign(document.createElement("script"), {
+        src,
+      });
+
+    const handleLoad = () => {
+      script.dataset.loaded = "true";
+      resolve();
+    };
+    const handleError = () => {
+      reject(new Error(`Failed to load script: ${src}`));
+    };
+
+    script.dataset.proxySrc = src;
+    script.addEventListener("load", handleLoad, { once: true });
+    script.addEventListener("error", handleError, { once: true });
+
+    if (!existing) {
+      document.head.appendChild(script);
+    }
+  });
+}
+
+function loadProxyScripts(): Promise<void> {
+  if (!proxyScriptsReadyPromise) {
+    proxyScriptsReadyPromise = Promise.all(
+      PROXY_SCRIPT_URLS.map((src) => ensureProxyScript(src)),
+    )
+      .then(() => undefined)
+      .catch((error) => {
+        proxyScriptsReadyPromise = null;
+        throw error;
+      });
+  }
+
+  return proxyScriptsReadyPromise;
+}
+
 function searchToUrl(input: string, template: string): string {
   try {
     return new URL(input).toString();
@@ -46,8 +100,26 @@ async function registerServiceWorker() {
     throw new Error("Your browser does not support service workers.");
   }
 
-  await navigator.serviceWorker.register("/sw.js");
-  await navigator.serviceWorker.ready;
+  if (!serviceWorkerReadyPromise) {
+    serviceWorkerReadyPromise = (async () => {
+      const existingRegistration =
+        await navigator.serviceWorker.getRegistration();
+
+      const registration =
+        existingRegistration ??
+        (await navigator.serviceWorker.register("/sw.js", {
+          updateViaCache: "none",
+        }));
+
+      await navigator.serviceWorker.ready;
+      return registration;
+    })().catch((error) => {
+      serviceWorkerReadyPromise = null;
+      throw error;
+    });
+  }
+
+  await serviceWorkerReadyPromise;
 }
 
 export default function App() {
@@ -72,11 +144,14 @@ export default function App() {
   const transportConfiguredRef = useRef(false);
 
   useEffect(() => {
-    const scriptUrls = ["/scram/scramjet.all.js", "/baremux/index.js"];
-    let loaded = 0;
+    let cancelled = false;
 
-    const onAllLoaded = () => {
-      try {
+    void loadProxyScripts()
+      .then(() => {
+        if (cancelled) {
+          return;
+        }
+
         const { ScramjetController } = $scramjetLoadController();
         controllerRef.current = new ScramjetController({
           files: {
@@ -90,26 +165,23 @@ export default function App() {
           "/baremux/worker.js",
         );
         setEngineReady(true);
-      } catch (cause) {
-        console.error("Failed to initialize Scramjet", cause);
-        setError("Failed to initialize the engine.");
-      }
-    };
-
-    for (const src of scriptUrls) {
-      const script = document.createElement("script");
-      script.src = src;
-      script.onload = () => {
-        loaded += 1;
-        if (loaded === scriptUrls.length) {
-          onAllLoaded();
+      })
+      .catch((cause: unknown) => {
+        if (cancelled) {
+          return;
         }
-      };
-      script.onerror = () => {
-        setError(`Failed to load script: ${src}`);
-      };
-      document.head.appendChild(script);
-    }
+
+        console.error("Failed to initialize Scramjet", cause);
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Failed to initialize the engine.",
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const navigate = useCallback(async (targetUrl: string) => {
@@ -122,62 +194,51 @@ export default function App() {
 
     try {
       await registerServiceWorker();
-    } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Service worker registration failed.",
-      );
-      setLoading(false);
-      return;
-    }
 
-    if (!controllerRef.current || !connectionRef.current) {
-      setError("Engine not ready. Refresh the page and try again.");
-      setLoading(false);
-      return;
-    }
+      if (!controllerRef.current || !connectionRef.current) {
+        throw new Error("Engine not ready. Refresh the page and try again.");
+      }
 
-    const resolved = searchToUrl(targetUrl, "https://duckduckgo.com/?q=%s");
-    const wispUrl =
-      (location.protocol === "https:" ? "wss" : "ws") +
-      "://" +
-      location.host +
-      "/wisp/";
+      const resolved = searchToUrl(targetUrl, "https://duckduckgo.com/?q=%s");
+      const wispUrl =
+        (location.protocol === "https:" ? "wss" : "ws") +
+        "://" +
+        location.host +
+        "/wisp/";
 
-    try {
       if (!transportConfiguredRef.current) {
         await connectionRef.current.setTransport("/libcurl/index.mjs", [
           { websocket: wispUrl },
         ]);
         transportConfiguredRef.current = true;
       }
+
+      if (!frameRef.current && controllerRef.current) {
+        const frame = controllerRef.current.createFrame();
+        frame.frame.style.width = "100%";
+        frame.frame.style.height = "100%";
+        frame.frame.style.border = "none";
+        frame.frame.id = "sj-frame";
+        frameRef.current = frame;
+
+        if (frameContainerRef.current) {
+          frameContainerRef.current.appendChild(frame.frame);
+        }
+      }
+
+      frameRef.current?.go(resolved);
+      setCurrentUrl(resolved);
+      setUrlInput(resolved);
+      setBrowsing(true);
     } catch (cause) {
       setError(
-        "Failed to configure transport: " +
-          (cause instanceof Error ? cause.message : String(cause)),
+        cause instanceof Error
+          ? cause.message
+          : "Navigation failed. Try refreshing the page.",
       );
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (!frameRef.current && controllerRef.current) {
-      const frame = controllerRef.current.createFrame();
-      frame.frame.style.width = "100%";
-      frame.frame.style.height = "100%";
-      frame.frame.style.border = "none";
-      frame.frame.id = "sj-frame";
-      frameRef.current = frame;
-
-      if (frameContainerRef.current) {
-        frameContainerRef.current.appendChild(frame.frame);
-      }
-    }
-
-    frameRef.current?.go(resolved);
-    setCurrentUrl(resolved);
-    setBrowsing(true);
-    setLoading(false);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -189,6 +250,7 @@ export default function App() {
     setBrowsing(false);
     setCurrentUrl("");
     setUrlInput("");
+    setError("");
     frameRef.current = null;
     transportConfiguredRef.current = false;
 
@@ -247,13 +309,10 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center px-4">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-8">
-            
               <h1 className="text-3xl font-bold text-white mb-1">
                 SVMS Math Help
               </h1>
-              <p className="text-gray-400 text-sm">
-                We all know who made it
-              </p>
+              <p className="text-gray-400 text-sm">We all know who made it</p>
             </div>
 
             {!engineReady && (
@@ -306,9 +365,13 @@ export default function App() {
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { label: "DuckDuckGo", url: "https://duckduckgo.com"},
-                { label: "ESPN", url: "https://espn.com"},
-                { label: "YouTube", url: "https://youtube.com"},
+                {
+                  label: "DuckDuckGo",
+                  url: "https://duckduckgo.com",
+                  tag: "search",
+                },
+                { label: "ESPN", url: "https://espn.com", tag: "sports" },
+                { label: "YouTube", url: "https://youtube.com", tag: "video" },
               ].map(({ label, url, tag }) => (
                 <button
                   key={label}

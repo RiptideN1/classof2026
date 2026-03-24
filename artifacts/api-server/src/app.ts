@@ -24,6 +24,7 @@ const proxyClientPath = path.resolve(
   "dist",
   "public",
 );
+const serviceWorkerPath = path.join(proxyClientPath, "sw.js");
 
 const app: Express = express();
 
@@ -71,6 +72,10 @@ logger.info({ libcurlPath }, "Serving libcurl static files at /libcurl");
 app.use("/libcurl", express.static(libcurlPath));
 
 app.use("/api", router);
+app.get("/sw.js", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(serviceWorkerPath);
+});
 app.use(express.static(proxyClientPath));
 app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(proxyClientPath, "index.html"));
