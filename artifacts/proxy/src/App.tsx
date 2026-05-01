@@ -24,6 +24,31 @@ const PROXY_SCRIPT_URLS = ["/scram/scramjet.all.js", "/baremux/index.js"];
 let proxyScriptsReadyPromise: Promise<void> | null = null;
 let serviceWorkerReadyPromise: Promise<ServiceWorkerRegistration> | null = null;
 
+async function waitForServiceWorkerControl(): Promise<void> {
+  if (navigator.serviceWorker.controller) {
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      reject(
+        new Error(
+          "Proxy setup is almost done. Refresh once, wait a second, and try again.",
+        ),
+      );
+    }, 4000);
+
+    navigator.serviceWorker.addEventListener(
+      "controllerchange",
+      () => {
+        window.clearTimeout(timeout);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
 function ensureProxyScript(src: string): Promise<void> {
   const existing = document.querySelector<HTMLScriptElement>(
     `script[data-proxy-src="${src}"]`,
@@ -129,6 +154,9 @@ export default function App() {
   const [browsing, setBrowsing] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
   const [engineReady, setEngineReady] = useState(false);
+  const [serviceWorkerControlled, setServiceWorkerControlled] = useState(
+    () => navigator.serviceWorker?.controller != null,
+  );
 
   const frameContainerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<{
@@ -184,6 +212,33 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!navigator.serviceWorker) {
+      return;
+    }
+
+    if (navigator.serviceWorker.controller) {
+      setServiceWorkerControlled(true);
+      return;
+    }
+
+    const handleControllerChange = () => {
+      setServiceWorkerControlled(true);
+    };
+
+    navigator.serviceWorker.addEventListener(
+      "controllerchange",
+      handleControllerChange,
+    );
+
+    return () => {
+      navigator.serviceWorker.removeEventListener(
+        "controllerchange",
+        handleControllerChange,
+      );
+    };
+  }, []);
+
   const navigate = useCallback(async (targetUrl: string) => {
     if (!targetUrl.trim()) {
       return;
@@ -194,6 +249,8 @@ export default function App() {
 
     try {
       await registerServiceWorker();
+      await waitForServiceWorkerControl();
+      setServiceWorkerControlled(true);
 
       if (!controllerRef.current || !connectionRef.current) {
         throw new Error("Engine not ready. Refresh the page and try again.");
@@ -315,10 +372,14 @@ export default function App() {
               <p className="text-gray-400 text-sm">We all know who made it</p>
             </div>
 
-            {!engineReady && (
+            {(!engineReady || !serviceWorkerControlled) && (
               <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-6">
                 <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <span>Loading engine...</span>
+                <span>
+                  {!engineReady
+                    ? "Loading engine..."
+                    : "Finishing proxy setup. Refresh once if this stays here."}
+                </span>
               </div>
             )}
 
@@ -341,11 +402,11 @@ export default function App() {
                   placeholder="Search the web or enter a URL..."
                   className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-base px-2 py-2"
                   autoFocus
-                  disabled={!engineReady}
+                  disabled={!engineReady || !serviceWorkerControlled}
                 />
                 <button
                   type="submit"
-                  disabled={!engineReady || loading}
+                  disabled={!engineReady || !serviceWorkerControlled || loading}
                   className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-semibold transition-colors"
                 >
                   {loading ? (

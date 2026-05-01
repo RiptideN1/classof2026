@@ -76,6 +76,11 @@ app.get("/sw.js", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.sendFile(serviceWorkerPath);
 });
+app.use("/scramjet", (_req, res) => {
+  res.status(502).type("text/plain").send(
+    "Scramjet request reached the server instead of the service worker.",
+  );
+});
 app.use(express.static(proxyClientPath));
 app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(proxyClientPath, "index.html"));
