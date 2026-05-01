@@ -12,7 +12,7 @@
   "dependencies": {
     "@mercuryworkshop/bare-mux": "^2.1.8",
     "@mercuryworkshop/libcurl-transport": "^1.5.2",
-    "@mercuryworkshop/scramjet": "https://github.com/MercuryWorkshop/scramjet/releases/download/latest/mercuryworkshop-scramjet-2.0.0-alpha.tgz",
+    "@mercuryworkshop/scramjet": "^1.0.2",
     "@mercuryworkshop/wisp-js": "^0.4.1",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
