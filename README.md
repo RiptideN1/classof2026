@@ -77,3 +77,20 @@ Start Command: pnpm run start:scramjet
 ```
 
 The service listens on Render's `PORT` automatically through the Node server.
+
+## YouTube Mode
+
+The homepage now includes a custom YouTube mode built on official YouTube APIs instead of trying to proxy the full YouTube website.
+
+Set this Render environment variable:
+
+```text
+YOUTUBE_API_KEY=your_youtube_data_api_v3_key
+```
+
+This mode uses:
+
+- YouTube Data API v3 for search and metadata
+- the official embedded YouTube player for playback
+
+The API key stays on the server and is used through `/api/youtube/search` and `/api/youtube/lookup`.
