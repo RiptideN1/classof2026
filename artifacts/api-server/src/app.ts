@@ -57,8 +57,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use((_req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  // Allow official third-party embeds like YouTube while keeping a stable browsing context.
+  res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 });
 
