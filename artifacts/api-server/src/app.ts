@@ -73,6 +73,78 @@ logger.info({ libcurlPath }, "Serving libcurl static files at /libcurl");
 app.use("/libcurl", express.static(libcurlPath));
 
 app.use("/api", router);
+app.get("/youtube-player", (req, res) => {
+  const embed = typeof req.query.embed === "string" ? req.query.embed : "";
+  const title =
+    typeof req.query.title === "string" && req.query.title.trim()
+      ? req.query.title.trim()
+      : "YouTube player";
+
+  if (!embed) {
+    res.status(400).type("text/plain").send("Missing embed URL.");
+    return;
+  }
+
+  let embedUrl: URL;
+
+  try {
+    embedUrl = new URL(embed);
+  } catch {
+    res.status(400).type("text/plain").send("Invalid embed URL.");
+    return;
+  }
+
+  const hostname = embedUrl.hostname.replace(/^www\./, "").toLowerCase();
+  const allowedHostnames = new Set(["youtube.com", "youtube-nocookie.com"]);
+
+  if (embedUrl.protocol !== "https:" || !allowedHostnames.has(hostname)) {
+    res.status(400).type("text/plain").send("Unsupported embed URL.");
+    return;
+  }
+
+  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data: https:;",
+  );
+
+  res
+    .status(200)
+    .type("html")
+    .send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${title.replace(/[<&>"]/g, "")}</title>
+    <style>
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe
+      src="${embedUrl.toString()}"
+      title="${title.replace(/[<&>"]/g, "")}"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+  </body>
+</html>`);
+});
 app.get("/sw.js", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.sendFile(serviceWorkerPath);

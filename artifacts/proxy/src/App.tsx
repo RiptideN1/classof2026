@@ -85,6 +85,15 @@ function buildYouTubeEmbedUrl(target: YouTubeTarget): string {
   return embedUrl.toString();
 }
 
+function buildYouTubePlayerShellUrl(embedUrl: string, title?: string): string {
+  const shellUrl = new URL("/youtube-player", window.location.origin);
+  shellUrl.searchParams.set("embed", embedUrl);
+  if (title) {
+    shellUrl.searchParams.set("title", title);
+  }
+  return shellUrl.toString();
+}
+
 function parseYouTubeTarget(rawInput: string): YouTubeTarget | null {
   let url: URL;
 
@@ -847,7 +856,11 @@ export default function App() {
                 <div className="aspect-video overflow-hidden rounded-3xl border border-gray-800 bg-black shadow-2xl">
                   {youtubeEmbedUrl ? (
                     <iframe
-                      src={youtubeEmbedUrl}
+                      key={youtubeEmbedUrl}
+                      src={buildYouTubePlayerShellUrl(
+                        youtubeEmbedUrl,
+                        youtubeSelected?.title ?? "YouTube player",
+                      )}
                       title={youtubeSelected?.title ?? "YouTube player"}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
