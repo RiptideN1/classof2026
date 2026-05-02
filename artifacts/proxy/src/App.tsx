@@ -20,6 +20,8 @@ declare global {
 }
 
 const PROXY_SCRIPT_URLS = ["/scram/scramjet.all.js", "/baremux/index.js"];
+const APP_BACKGROUND_IMAGE =
+  "https://images.unsplash.com/photo-1653089116335-137ea51598a9?ixid=M3w4ODczOHwwfDF8YWxsfHx8fHx8fHx8MTc1OTU5NjI5OHw&ixlib=rb-4.1.0&auto=format&fit=crop&crop=entropy&h=1080&w=1920&q=80";
 
 let proxyScriptsReadyPromise: Promise<void> | null = null;
 let serviceWorkerReadyPromise: Promise<ServiceWorkerRegistration> | null = null;
@@ -471,7 +473,7 @@ export default function App() {
 
       if (/^(yt|youtube)\s+/i.test(trimmed)) {
         const query = trimmed.replace(/^(yt|youtube)\s+/i, "");
-        setYoutubeQuery(query);
+        setYouTubeQuery(query);
         await fetchYouTubeSearch(query);
         return;
       }
@@ -560,7 +562,22 @@ export default function App() {
   const showYouTubeChrome = viewMode === "youtube";
 
   return (
-    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
+    <div className="relative h-screen overflow-hidden bg-[#0c2626] text-white">
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-70"
+        style={{ backgroundImage: `url(${APP_BACKGROUND_IMAGE})` }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-30"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at center, rgba(255,255,255,0.22) 0 1px, transparent 1.2px)",
+          backgroundSize: "16px 16px",
+        }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(12,38,38,0.18),rgba(12,38,38,0.82)),radial-gradient(circle_at_top,rgba(24,90,99,0.38),transparent_54%),linear-gradient(135deg,rgba(8,26,28,0.44),rgba(8,26,28,0.8))] backdrop-blur-md" />
+
+      <div className="relative z-10 flex h-full flex-col overflow-hidden">
       {showProxyChrome && (
         <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
           <button
@@ -628,7 +645,7 @@ export default function App() {
               <input
                 type="text"
                 value={youtubeQuery}
-                onChange={(e) => setYoutubeQuery(e.target.value)}
+                onChange={(e) => setYouTubeQuery(e.target.value)}
                 placeholder="Search YouTube videos and playlists..."
                 className="bg-transparent outline-none text-sm text-white placeholder-gray-500 flex-1"
               />
@@ -648,10 +665,10 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-auto">
           <div className="w-full max-w-5xl">
             <div className="text-center mb-10">
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="mb-2 text-4xl font-bold text-white drop-shadow-[0_6px_20px_rgba(0,0,0,0.45)]">
                 SVMS Math Help
               </h1>
-              <p className="text-gray-400 text-sm">
+              <p className="text-sm text-teal-50/78">
                 Proxy the web or switch to official YouTube mode
               </p>
             </div>
@@ -668,7 +685,7 @@ export default function App() {
             )}
 
             <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="rounded-3xl border border-gray-800 bg-gray-900/80 p-6 shadow-xl">
+              <div className="rounded-3xl border border-white/12 bg-[rgba(7,16,19,0.68)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
                 <div className="mb-4">
                   <div className="text-xs uppercase tracking-[0.28em] text-blue-400">
                     Web Proxy
@@ -676,7 +693,7 @@ export default function App() {
                   <h2 className="text-2xl font-semibold mt-2">
                     Browse regular sites
                   </h2>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="mt-2 text-sm text-gray-300">
                     Search the web or open a URL through the Scramjet browser shell.
                   </p>
                 </div>
@@ -746,7 +763,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-red-900/40 bg-gradient-to-b from-red-950/70 to-gray-900 p-6 shadow-xl">
+              <div className="rounded-3xl border border-red-300/15 bg-[linear-gradient(180deg,rgba(74,15,25,0.76),rgba(10,14,17,0.78))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.4)] backdrop-blur-xl">
                 <div className="mb-4">
                   <div className="text-xs uppercase tracking-[0.28em] text-red-400">
                     YouTube Mode
@@ -774,7 +791,7 @@ export default function App() {
                     <input
                       type="text"
                       value={youtubeQuery}
-                      onChange={(e) => setYoutubeQuery(e.target.value)}
+                      onChange={(e) => setYouTubeQuery(e.target.value)}
                       placeholder="Search YouTube or paste a YouTube link..."
                       className="flex-1 bg-transparent outline-none text-white placeholder:text-red-100/50 text-base px-2 py-2"
                     />
@@ -790,7 +807,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setYoutubeQuery("lofi hip hop");
+                        setYouTubeQuery("lofi hip hop");
                         void fetchYouTubeSearch("lofi hip hop");
                       }}
                       className="px-4 py-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-sm font-medium transition-colors"
@@ -823,7 +840,7 @@ export default function App() {
       )}
 
       {viewMode === "youtube" && (
-        <div className="flex-1 overflow-auto bg-gray-950">
+        <div className="flex-1 overflow-auto">
           <div className="mx-auto max-w-7xl px-4 py-6">
             <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
               <div className="space-y-4">
@@ -845,7 +862,7 @@ export default function App() {
                 </div>
 
                 {youtubeSelected && (
-                  <div className="rounded-3xl border border-gray-800 bg-gray-900/80 p-5">
+                  <div className="rounded-3xl border border-white/10 bg-[rgba(7,16,19,0.72)] p-5 backdrop-blur-xl">
                     <div className="text-xs uppercase tracking-[0.24em] text-red-400">
                       {youtubeSelected.type}
                     </div>
@@ -865,7 +882,7 @@ export default function App() {
               </div>
 
               <div className="space-y-4">
-                <div className="rounded-3xl border border-gray-800 bg-gray-900/80 p-5">
+                <div className="rounded-3xl border border-white/10 bg-[rgba(7,16,19,0.72)] p-5 backdrop-blur-xl">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-xs uppercase tracking-[0.24em] text-red-400">
@@ -950,6 +967,7 @@ export default function App() {
         className="flex-1"
         style={{ display: viewMode === "proxy" ? "block" : "none" }}
       />
+      </div>
     </div>
   );
 }
