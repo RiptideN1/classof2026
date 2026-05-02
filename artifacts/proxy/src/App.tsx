@@ -360,8 +360,8 @@ export default function App() {
         return;
       }
 
-      setYoutubeLoading(true);
-      setYoutubeError("");
+      setYouTubeLoading(true);
+      setYouTubeError("");
 
       try {
         const url = new URL("/api/youtube/search", window.location.origin);
@@ -383,25 +383,25 @@ export default function App() {
           );
         }
 
-        setYoutubeResults((previous) =>
+        setYouTubeResults((previous) =>
           pageToken ? [...previous, ...data.items] : data.items,
         );
-        setYoutubeNextPageToken(data.nextPageToken);
+        setYouTubeNextPageToken(data.nextPageToken);
         setViewMode("youtube");
       } catch (cause) {
-        setYoutubeError(
+        setYouTubeError(
           cause instanceof Error ? cause.message : "YouTube search failed.",
         );
       } finally {
-        setYoutubeLoading(false);
+        setYouTubeLoading(false);
       }
     },
     [],
   );
 
   const loadYouTubeTarget = useCallback(async (target: YouTubeTarget) => {
-    setYoutubeLoading(true);
-    setYoutubeError("");
+    setYouTubeLoading(true);
+    setYouTubeError("");
 
     try {
       const lookupUrl = new URL("/api/youtube/lookup", window.location.origin);
@@ -424,17 +424,17 @@ export default function App() {
         );
       }
 
-      setYoutubeSelected(data.item);
-      setYoutubeEmbedUrl(buildYouTubeEmbedUrl(target));
-      setYoutubeResults([]);
-      setYoutubeNextPageToken(null);
+      setYouTubeSelected(data.item);
+      setYouTubeEmbedUrl(buildYouTubeEmbedUrl(target));
+      setYouTubeResults([]);
+      setYouTubeNextPageToken(null);
       setViewMode("youtube");
     } catch (cause) {
-      setYoutubeError(
+      setYouTubeError(
         cause instanceof Error ? cause.message : "Failed to load YouTube item.",
       );
     } finally {
-      setYoutubeLoading(false);
+      setYouTubeLoading(false);
     }
   }, []);
 
@@ -450,8 +450,8 @@ export default function App() {
             videoId: item.id,
           };
 
-    setYoutubeSelected(item);
-    setYoutubeEmbedUrl(buildYouTubeEmbedUrl(target));
+    setYouTubeSelected(item);
+    setYouTubeEmbedUrl(buildYouTubeEmbedUrl(target));
     setViewMode("youtube");
   }, []);
 
@@ -549,7 +549,7 @@ export default function App() {
     setCurrentUrl("");
     setUrlInput("");
     setError("");
-    setYoutubeError("");
+    setYouTubeError("");
     frameRef.current = null;
     transportConfiguredRef.current = false;
 
