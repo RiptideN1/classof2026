@@ -853,20 +853,14 @@ export default function App() {
           <div className="mx-auto max-w-7xl px-4 py-6">
             <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
               <div className="space-y-4">
-                <div className="aspect-video overflow-hidden rounded-3xl border border-gray-800 bg-black shadow-2xl">
-                  {youtubeEmbedUrl ? (
-                    <iframe
-                      key={youtubeEmbedUrl}
-                      src={buildYouTubePlayerShellUrl(
-                        youtubeEmbedUrl,
-                        youtubeSelected?.title ?? "YouTube player",
-                      )}
-                      title={youtubeSelected?.title ?? "YouTube player"}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="h-full w-full border-0"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                    />
+                <iframe
+  src={youtubeEmbedUrl}
+  title={youtubeSelected?.title ?? "YouTube player"}
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+  className="h-full w-full border-0"
+  referrerPolicy="strict-origin-when-cross-origin"
+/>
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
                       Search above to load a video or playlist.
